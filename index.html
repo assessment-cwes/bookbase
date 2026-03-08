@@ -1,0 +1,3047 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BookBase - Your Digital Library Hub for discovering, tracking, and sharing books">
+    <meta name="theme-color" content="#4361ee">
+    <title>BookBase - Your Digital Library Hub</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/manifest+json,{
+    &quot;name&quot;:&quot;BookBase&quot;,
+    &quot;short_name&quot;:&quot;BookBase&quot;,
+    &quot;start_url&quot;:&quot;.&quot;,
+    &quot;display&quot;:&quot;standalone&quot;,
+    &quot;background_color&quot;:&quot;#f8fafc&quot;,
+    &quot;theme_color&quot;:&quot;#4361ee&quot;,
+    &quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;text y='.9em' font-size='90'&gt;📚&lt;/text&gt;&lt;/svg&gt;&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]
+  }">
+
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>"
+        type="image/svg+xml">
+
+    <style>
+        /* ===== CSS VARIABLES & THEME SUPPORT ===== */
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --accent: #4cc9f0;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --success: #2ecc71;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 6px 25px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
+            --border-radius: 16px;
+            --border-radius-lg: 24px;
+            --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            --transition-fast: all 0.2s ease;
+
+            --bg-primary: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-inverse: #ffffff;
+            --border-color: #e2e8f0;
+
+            --input-bg: #ffffff;
+            --input-border: #e2e8f0;
+            --input-focus: #4361ee;
+            --btn-gradient: linear-gradient(45deg, var(--primary), var(--secondary));
+        }
+
+        [data-theme="dark"] {
+            --dark: #f8fafc;
+            --light: #0f172a;
+            --gray: #94a3b8;
+            --bg-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --input-bg: #1e293b;
+            --input-border: #334155;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 6px 25px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: background var(--transition), color var(--transition);
+        }
+
+        /* ===== PAGE SECTIONS ===== */
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding-top: 80px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== NAVIGATION ===== */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 8%;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: var(--shadow);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+
+        [data-theme="dark"] .navbar {
+            background: rgba(30, 41, 59, 0.95);
+        }
+
+        .navbar.scrolled {
+            padding: 0.8rem 8%;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: var(--shadow-hover);
+        }
+
+        [data-theme="dark"] .navbar.scrolled {
+            background: rgba(30, 41, 59, 0.98);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            transform: scale(1.03);
+        }
+
+        .logo-icon {
+            margin-right: 8px;
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 1.05rem;
+            transition: var(--transition);
+            position: relative;
+            padding: 0.5rem 0;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--border-color);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.2rem;
+            color: var(--text-primary);
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: rotate(15deg);
+        }
+
+        .theme-toggle .sun-icon {
+            display: none;
+        }
+
+        .theme-toggle .moon-icon {
+            display: block;
+        }
+
+        [data-theme="dark"] .theme-toggle .sun-icon {
+            display: block;
+        }
+
+        [data-theme="dark"] .theme-toggle .moon-icon {
+            display: none;
+        }
+
+        /* Search */
+        .search-container {
+            position: relative;
+        }
+
+        .search-bar {
+            padding: 0.6rem 1.2rem 0.6rem 2.5rem;
+            border: 2px solid var(--input-border);
+            border-radius: 50px;
+            font-size: 1rem;
+            width: 220px;
+            transition: var(--transition);
+            background: var(--input-bg);
+            color: var(--text-primary);
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--primary);
+            width: 240px;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            pointer-events: none;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: var(--shadow-hover);
+            margin-top: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-primary);
+        }
+
+        .search-result-item:hover {
+            background: var(--bg-secondary);
+            padding-left: 24px;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: var(--transition);
+        }
+
+        .btn:hover::after {
+            left: 100%;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.45);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-login {
+            background: var(--secondary);
+            box-shadow: 0 4px 15px rgba(114, 9, 183, 0.35);
+        }
+
+        .btn-login:hover {
+            background: #5e0796;
+            box-shadow: 0 6px 20px rgba(114, 9, 183, 0.45);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            padding: 10rem 8% 6rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before,
+        .hero::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .hero::before {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(67, 97, 238, 0.1) 0%, transparent 70%);
+            top: -200px;
+            right: -100px;
+        }
+
+        .hero::after {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(114, 9, 183, 0.1) 0%, transparent 70%);
+            bottom: -100px;
+            left: -50px;
+        }
+
+        .hero-content {
+            flex: 1;
+            max-width: 600px;
+            z-index: 1;
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            background: var(--btn-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            max-width: 550px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .hero-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .book-stack {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            perspective: 1000px;
+        }
+
+        .book {
+            position: absolute;
+            width: 220px;
+            height: 300px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: var(--shadow-hover);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            transition: var(--transition);
+            transform-style: preserve-3d;
+            border: 3px solid white;
+        }
+
+        .book-1 {
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+            color: white;
+            transform: rotateY(-15deg) rotateX(10deg) translateZ(20px);
+            z-index: 3;
+        }
+
+        .book-2 {
+            background: linear-gradient(135deg, #7209b7, #480ca8);
+            color: white;
+            transform: rotateY(10deg) rotateX(-5deg) translateZ(0);
+            z-index: 2;
+            top: 20px;
+            left: 30px;
+        }
+
+        .book-3 {
+            background: linear-gradient(135deg, #4cc9f0, #4895ef);
+            color: white;
+            transform: rotateY(5deg) rotateX(5deg) translateZ(-20px);
+            z-index: 1;
+            top: 40px;
+            left: 60px;
+        }
+
+        .book:hover {
+            transform: scale(1.05) rotateY(0) rotateX(0) translateZ(30px);
+            z-index: 10;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        /* ===== CHARACTER OF THE WEEK ===== */
+        .character-section {
+            padding: 4rem 8%;
+            background: var(--bg-secondary);
+            position: relative;
+        }
+
+        .character-card {
+            display: flex;
+            background: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            max-width: 900px;
+            margin: 0 auto;
+            transition: var(--transition);
+        }
+
+        .character-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+        }
+
+        .character-image {
+            flex: 1;
+            min-height: 400px;
+            background: var(--btn-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .character-image::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 15s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .character-avatar {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border: 5px solid white;
+            position: relative;
+            z-index: 2;
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(67, 97, 238, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(67, 97, 238, 0);
+            }
+        }
+
+        .character-details {
+            flex: 1.2;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .character-name {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: var(--btn-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .character-class {
+            display: inline-block;
+            background: var(--btn-gradient);
+            color: white;
+            padding: 0.4rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .character-description {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 1.8rem;
+        }
+
+        .character-stats {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ===== READING CHALLENGE ===== */
+        .challenge-section {
+            padding: 4rem 8%;
+            background: var(--bg-secondary);
+        }
+
+        .challenge-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .challenge-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .challenge-badge {
+            background: var(--warning);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .progress-container {
+            background: var(--border-color);
+            border-radius: 10px;
+            height: 12px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--btn-gradient);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 65%;
+        }
+
+        .progress-text {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* ===== FEATURES SECTION ===== */
+        .features {
+            padding: 6rem 8%;
+            background: var(--bg-secondary);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .section-title p {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 1.5rem auto 0;
+            font-size: 1.1rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--btn-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: var(--transition);
+            z-index: 2;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            display: inline-block;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+        }
+
+        /* ===== LOGIN PAGE ===== */
+        #login-page {
+            display: none;
+            min-height: 100vh;
+            padding-top: 80px;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #login-page.active {
+            display: flex;
+        }
+
+        .login-container {
+            background: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 450px;
+            padding: 2.5rem;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: var(--btn-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+        }
+
+        .security-notice {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .security-notice.show {
+            display: block;
+        }
+
+        .security-notice p {
+            color: var(--danger);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .login-form .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .login-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--input-bg);
+            color: var(--text-primary);
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .login-form input.error {
+            border-color: var(--danger);
+            animation: shake 0.5s;
+        }
+
+        .password-strength {
+            margin-top: 0.5rem;
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+
+        .strength-weak {
+            background: var(--danger);
+            width: 33%;
+        }
+
+        .strength-medium {
+            background: var(--warning);
+            width: 66%;
+        }
+
+        .strength-strong {
+            background: var(--success);
+            width: 100%;
+        }
+
+        .login-form .error {
+            color: var(--danger);
+            font-size: 0.9rem;
+            margin-top: 0.4rem;
+            display: none;
+        }
+
+        .login-form .error.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .login-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.9rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .login-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        .back-to-home {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .back-to-home:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        .session-info {
+            background: rgba(67, 97, 238, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .session-info.show {
+            display: block;
+        }
+
+        .session-info p {
+            color: var(--primary);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        /* ===== GALLERY SECTION ===== */
+        .gallery-section {
+            padding: 6rem 8%;
+            background: var(--bg-primary);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.8rem;
+            margin-top: 2rem;
+        }
+
+        .gallery-item {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            position: relative;
+            height: 250px;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--btn-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-hover);
+            z-index: 10;
+        }
+
+        .gallery-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .gallery-item:hover::before {
+            opacity: 1;
+        }
+
+        .gallery-item span {
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: var(--transition);
+        }
+
+        .gallery-item:hover span {
+            transform: scale(1.1);
+        }
+
+        .gallery-item:nth-child(1) {
+            background: linear-gradient(45deg, #4361ee, #3a0ca3);
+        }
+
+        .gallery-item:nth-child(2) {
+            background: linear-gradient(45deg, #7209b7, #480ca8);
+        }
+
+        .gallery-item:nth-child(3) {
+            background: linear-gradient(45deg, #4cc9f0, #4895ef);
+        }
+
+        .gallery-item:nth-child(4) {
+            background: linear-gradient(45deg, #f72585, #b5179e);
+        }
+
+        .gallery-item:nth-child(5) {
+            background: linear-gradient(45deg, #4895ef, #3f37c9);
+        }
+
+        .gallery-item:nth-child(6) {
+            background: linear-gradient(45deg, #4cc9f0, #4361ee);
+        }
+
+        .gallery-item:nth-child(7) {
+            background: linear-gradient(45deg, #7209b7, #560bad);
+        }
+
+        .gallery-item:nth-child(8) {
+            background: linear-gradient(45deg, #4895ef, #3a0ca3);
+        }
+
+        .gallery-item.lazy {
+            background: var(--border-color);
+            animation: pulse 2s infinite;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .lightbox.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            background: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            position: relative;
+            transform: scale(0.9);
+            transition: var(--transition);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+        }
+
+        .lightbox.active .lightbox-content {
+            transform: scale(1);
+        }
+
+        .lightbox-img {
+            width: 100%;
+            height: 600px;
+            background: var(--btn-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 5rem;
+            font-weight: bold;
+        }
+
+        .lightbox-caption {
+            padding: 1.5rem;
+            text-align: center;
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            z-index: 10;
+        }
+
+        .lightbox-close:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: rotate(90deg);
+        }
+
+        /* ===== CTA SECTION ===== */
+        .cta {
+            padding: 5rem 8%;
+            text-align: center;
+            background: var(--btn-gradient);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            top: -300px;
+            right: -200px;
+            z-index: 0;
+        }
+
+        .cta h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta p {
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin: 0 auto 2.5rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta .btn {
+            background: white;
+            color: var(--primary);
+            font-size: 1.2rem;
+            padding: 1rem 2.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--dark);
+            color: rgba(255, 255, 255, 0.85);
+            padding: 4rem 8% 2rem;
+            position: relative;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--btn-gradient);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-col h3 {
+            color: white;
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.75rem;
+        }
+
+        .footer-col h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-col ul li a {
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            transition: var(--transition);
+            display: block;
+            position: relative;
+            padding-left: 15px;
+        }
+
+        .footer-col ul li a::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .footer-col ul li a:hover::before {
+            opacity: 1;
+            left: -5px;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .powered-by {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0.8rem;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .powered-by span {
+            color: var(--accent);
+            font-weight: 700;
+            margin-left: 4px;
+            background: var(--btn-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 1.1rem;
+        }
+
+        /* ===== TOAST NOTIFICATIONS ===== */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            max-width: 350px;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            animation: slideInRight 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+            border-left: 4px solid var(--primary);
+        }
+
+        .toast.success {
+            border-left-color: var(--success);
+        }
+
+        .toast.error {
+            border-left-color: var(--danger);
+        }
+
+        .toast.warning {
+            border-left-color: var(--warning);
+        }
+
+        .toast.info {
+            border-left-color: var(--info);
+        }
+
+        .toast-icon {
+            font-size: 1.3rem;
+            min-width: 24px;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0;
+            line-height: 1;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+        }
+
+        /* ===== ACCESSIBILITY ===== */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            z-index: 1001;
+            transition: top 0.3s;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+        a:focus,
+        button:focus,
+        input:focus {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .font-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .font-btn {
+            background: var(--border-color);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .font-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 992px) {
+            .hero {
+                flex-direction: column;
+                text-align: center;
+                padding-top: 8rem;
+            }
+
+            .hero-content {
+                margin-bottom: 4rem;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .hero p {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .book-stack {
+                width: 250px;
+                height: 350px;
+            }
+
+            .character-card {
+                flex-direction: column;
+            }
+
+            .character-image {
+                min-height: 300px;
+            }
+
+            .character-avatar {
+                width: 180px;
+                height: 180px;
+                font-size: 4rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                right: -100%;
+                flex-direction: column;
+                background: var(--bg-card);
+                width: 80%;
+                height: calc(100vh - 70px);
+                padding: 2rem;
+                box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+                transition: var(--transition);
+                z-index: 999;
+            }
+
+            [data-theme="dark"] .nav-links {
+                background: var(--bg-secondary);
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .nav-links li {
+                margin: 1.2rem 0;
+            }
+
+            .search-container {
+                margin-right: 0;
+                margin-bottom: 1.5rem;
+                width: 100%;
+            }
+
+            .search-bar {
+                width: 100%;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+
+            .hero p {
+                font-size: 1.15rem;
+            }
+
+            .section-title h2 {
+                font-size: 2.2rem;
+            }
+
+            .character-name {
+                font-size: 1.8rem;
+            }
+
+            .character-stats {
+                flex-wrap: wrap;
+            }
+
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+
+            .lightbox-img {
+                height: 400px;
+            }
+
+            .toast-container {
+                right: 1rem;
+                left: 1rem;
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 1rem 5%;
+            }
+
+            .navbar.scrolled {
+                padding: 0.7rem 5%;
+            }
+
+            .hero {
+                padding: 9rem 5% 4rem;
+            }
+
+            .hero h1 {
+                font-size: 2.4rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .btn-outline {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+
+            .book-stack {
+                width: 220px;
+                height: 320px;
+            }
+
+            .book {
+                width: 190px;
+                height: 270px;
+                font-size: 3.5rem;
+            }
+
+            .features,
+            .cta,
+            .gallery-section {
+                padding: 4rem 5%;
+            }
+
+            .character-section {
+                padding: 3rem 5%;
+            }
+
+            .character-details {
+                padding: 2rem;
+            }
+
+            .footer {
+                padding: 3rem 5% 1.5rem;
+            }
+
+            .login-container {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
+            }
+
+            .lightbox-img {
+                height: 300px;
+            }
+
+            .challenge-card {
+                padding: 1.5rem;
+            }
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .text-center {
+            text-align: center;
+        }
+
+        .mb-2 {
+            margin-bottom: 2rem;
+        }
+
+        .mt-3 {
+            margin-top: 3rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* ===== ANIMATIONS FOR ELEMENTS ON SCROLL ===== */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: var(--transition);
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== LOADING SKELETON ===== */
+        .skeleton {
+            background: linear-gradient(90deg, var(--border-color) 25%, var(--bg-card) 50%, var(--border-color) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* ===== SEARCH FILTERS ===== */
+        .search-filters {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-select {
+            padding: 0.6rem 1.2rem;
+            border: 2px solid var(--input-border);
+            border-radius: 50px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* ===== ACTIVITY LOG ===== */
+        .activity-log {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .activity-log h4 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Accessibility Skip Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+    <!-- NAVIGATION -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <a href="#" class="logo" data-page="home" aria-label="BookBase Home">
+            <span class="logo-icon" aria-hidden="true">📚</span>
+            BookBase
+        </a>
+
+        <ul class="nav-links" role="menubar">
+            <li role="none"><a role="menuitem" class="active" data-page="home" tabindex="0">Home</a></li>
+            <li role="none"><a role="menuitem" href="#features" tabindex="0">Features</a></li>
+            <li role="none"><a role="menuitem" href="#gallery" tabindex="0">Gallery</a></li>
+            <li role="none"><a role="menuitem" href="#contact" tabindex="0">Contact</a></li>
+        </ul>
+
+        <div class="nav-actions">
+            <!-- Font Size Controls -->
+            <div class="font-controls" aria-label="Font size controls">
+                <button class="font-btn" id="fontDecrease" aria-label="Decrease font size">A-</button>
+                <button class="font-btn" id="fontIncrease" aria-label="Increase font size">A+</button>
+            </div>
+
+            <!-- Theme Toggle -->
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">
+                <span class="sun-icon" aria-hidden="true">☀️</span>
+                <span class="moon-icon" aria-hidden="true">🌙</span>
+            </button>
+
+            <!-- Search -->
+            <div class="search-container">
+                <span class="search-icon" aria-hidden="true">🔍</span>
+                <input type="search" class="search-bar" placeholder="Search books..." aria-label="Search books">
+                <div class="search-results" role="listbox" aria-label="Search results"></div>
+            </div>
+
+            <!-- Auth Buttons -->
+            <button class="btn btn-login" id="login-btn" aria-label="Login to admin panel">Login</button>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu" aria-expanded="false">☰</button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main id="main-content">
+        <!-- HOME PAGE -->
+        <section id="home-page" class="page active" role="region" aria-label="Home page">
+            <!-- HERO SECTION -->
+            <section class="hero">
+                <div class="hero-content">
+                    <h1>Discover Your Next Favorite Book</h1>
+                    <p>BookBase connects readers with millions of books, personalized recommendations, and a vibrant
+                        community of book lovers. Start your literary journey today.</p>
+                    <div class="hero-buttons">
+                        <a href="#login-page" class="btn" rel="noopener">Get Started</a>
+                        <a href="#features" class="btn btn-outline">Explore Features</a>
+                    </div>
+                    <p style="font-size: 0.95rem; color: var(--text-secondary);">
+                        <strong>Trusted by 500,000+ readers worldwide</strong>
+                    </p>
+                </div>
+                <div class="hero-image">
+                    <div class="book-stack" aria-hidden="true">
+                        <div class="book book-1">📖</div>
+                        <div class="book book-2">📚</div>
+                        <div class="book book-3">🔖</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CHARACTER OF THE WEEK SECTION -->
+            <section class="character-section">
+                <div class="section-title">
+                    <h2>Student of the Week</h2>
+                    <p>Meet our outstanding community member who embodies the spirit of reading</p>
+                </div>
+
+                <div class="character-card animate-on-scroll">
+                    <div class="character-image">
+                        <div class="character-avatar" aria-label="Student avatar">👩‍🎓</div>
+                    </div>
+                    <div class="character-details">
+                        <h3 class="character-name">Lily Yendaw </h3>
+                        <span class="character-class">Class: JHS</span>
+                        <p class="character-description">Lily is a passionate reader who has completed over 75 books
+                            this year! She specializes in historical fiction and magical realism, and leads our weekly
+                            book club discussions. Her thoughtful reviews and creative reading challenges inspire our
+                            entire community.</p>
+                        <div class="character-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">75+</div>
+                                <div class="stat-label">Books Read</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">4.9</div>
+                                <div class="stat-label">Avg. Rating</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">14</div>
+                                <div class="stat-label">Reviews</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- READING CHALLENGE SECTION -->
+            <section class="challenge-section">
+                <div class="section-title">
+                    <h2>🎯 2026 Reading Challenge</h2>
+                    <p>Join our community challenge and track your progress</p>
+                </div>
+
+                <div class="challenge-card animate-on-scroll">
+                    <div class="challenge-header">
+                        <span class="challenge-badge">Active</span>
+                        <h3>Read 50 Books This Year</h3>
+                    </div>
+                    <p class="progress-text"><span id="booksRead">00</span> of 50 books completed</p>
+                    <div class="progress-container" role="progressbar" aria-valuenow="65" aria-valuemin="0"
+                        aria-valuemax="100">
+                        <div class="progress-bar" id="challengeProgress"></div>
+                    </div>
+                    <button class="btn btn-outline" id="updateProgress">+ Add Book</button>
+                </div>
+            </section>
+
+            <!-- FEATURES SECTION -->
+            <section class="features" id="features">
+                <div class="section-title">
+                    <h2>Powerful Features for Book Lovers</h2>
+                    <p>Everything you need to discover, track, and share your reading journey</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card animate-on-scroll">
+                        <div class="feature-icon" aria-hidden="true">🔍</div>
+                        <h3>Smart Search</h3>
+                        <p>Find books by title, author, genre, or even by mood with our intelligent search system.</p>
+                    </div>
+                    <div class="feature-card animate-on-scroll">
+                        <div class="feature-icon" aria-hidden="true">📊</div>
+                        <h3>Reading Tracker</h3>
+                        <p>Track your progress, set reading goals, and visualize your literary achievements.</p>
+                    </div>
+                    <div class="feature-card animate-on-scroll">
+                        <div class="feature-icon" aria-hidden="true">💬</div>
+                        <h3>Community Reviews</h3>
+                        <p>Share thoughts, read authentic reviews, and get recommendations from fellow readers.</p>
+                    </div>
+                    <div class="feature-card animate-on-scroll">
+                        <div class="feature-icon" aria-hidden="true">🎁</div>
+                        <h3>Personalized Picks</h3>
+                        <p>AI-powered recommendations tailored to your reading history and preferences.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- GALLERY SECTION -->
+            <section class="gallery-section" id="gallery">
+                <div class="section-title">
+                    <h2>Community Gallery</h2>
+                    <p>Explore beautiful moments from our reading community</p>
+                </div>
+
+                <div class="search-filters">
+                    <select class="filter-select" id="genreFilter" aria-label="Filter by genre">
+                        <option value="">All Genres</option>
+                        <option value="fiction">Fiction</option>
+                        <option value="nonfiction">Non-Fiction</option>
+                        <option value="mystery">Mystery</option>
+                        <option value="romance">Romance</option>
+                    </select>
+                    <select class="filter-select" id="yearFilter" aria-label="Filter by year">
+                        <option value="">Any Year</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                    </select>
+                </div>
+
+                <div class="gallery-grid">
+                    <div class="gallery-item animate-on-scroll lazy" data-caption="Book Club Meetup"
+                        data-genre="fiction" data-year="2026"><span>📚</span></div>
+                    <div class="gallery-item animate-on-scroll lazy" data-caption="Reading Nook" data-genre="nonfiction"
+                        data-year="2025"><span>☕</span></div>
+                    <div class="gallery-item animate-on-scroll lazy" data-caption="Author Event" data-genre="fiction"
+                        data-year="2026"><span>✍️</span></div>
+                    <div class="gallery-item animate-on-scroll lazy" data-caption="Library Visit"
+                        data-genre="nonfiction" data-year="2024"><span>🏛️</span></div>
+                    <div class="gallery-item animate-on-scroll lazy" data-caption="Book Swap" data-genre="mystery"
+                        data-year="2026"><span>🔄</span></div>
+                    <div class="gallery-item animate-on-scroll lazy" data-caption="Reading Challenge"
+                        data-genre="romance" data-year="2025"><span>🏆</span></div>
+                    <div class="gallery-item animate-on-scroll lazy" data-caption="Poetry Night" data-genre="fiction"
+                        data-year="2026"><span>🎤</span></div>
+                    <div class="gallery-item animate-on-scroll lazy" data-caption="New Releases" data-genre="nonfiction"
+                        data-year="2026"><span>✨</span></div>
+                </div>
+            </section>
+
+            <!-- NEWSLETTER SECTION -->
+            <section class="cta">
+                <h2>📬 Get Weekly Book Picks</h2>
+                <p>Subscribe to our newsletter for curated recommendations, exclusive content, and reading challenges
+                    delivered to your inbox.</p>
+                <form class="newsletter-form" id="newsletterForm"
+                    style="max-width: 500px; margin: 0 auto 1.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <input type="email" placeholder="your@email.com" required aria-label="Email address"
+                        style="flex: 1; min-width: 200px; padding: 0.9rem 1.2rem; border-radius: 50px; border: 2px solid white;">
+                    <button type="submit" class="btn"
+                        style="background: var(--primary); color: white;">Subscribe</button>
+                </form>
+                <small style="opacity: 0.9;">✨ No spam. Unsubscribe anytime.</small>
+            </section>
+        </section>
+
+        <!-- LOGIN PAGE -->
+        <section id="login-page" class="page" role="region" aria-label="Admin login">
+            <div class="login-container">
+                <div class="login-header">
+                    <h2>Admin Login</h2>
+                    <p>Access your BookBase dashboard</p>
+                </div>
+
+                <!-- Security Notice -->
+                <div class="security-notice" id="securityNotice" role="alert">
+                    <p>⚠️ <strong>Security Alert:</strong> Too many failed attempts. Account locked for 15 minutes.</p>
+                </div>
+
+                <form class="login-form" id="login-form" novalidate>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required
+                            autocomplete="username" aria-required="true">
+                        <div class="error" id="username-error" role="alert">Invalid username</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required
+                            autocomplete="current-password" aria-required="true">
+                        <div class="password-strength" aria-hidden="true">
+                            <div class="strength-bar" id="strengthBar"></div>
+                        </div>
+                        <div class="error" id="password-error" role="alert">Invalid password</div>
+                    </div>
+                    <button type="submit" class="login-btn" id="loginSubmit">Sign In</button>
+                </form>
+
+                <!-- Session Info (shown when authenticated) -->
+                <div class="session-info" id="sessionInfo">
+                    <p>🔐 Session expires in <span id="sessionTimer">24:00:00</span></p>
+                </div>
+
+                <a href="#" class="back-to-home" id="back-to-home">← Back to Home</a>
+
+                <!-- Activity Log -->
+                <div class="activity-log" id="activityLog">
+                    <h4>📋 Recent Activity</h4>
+                    <div id="activityItems"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <a href="#" class="logo"
+                    style="color: white; margin-bottom: 1.5rem; display: inline-flex; align-items: center;">
+                    <span class="logo-icon" aria-hidden="true">📚</span>
+                    BookBase
+                </a>
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: 1.5rem;">
+                    Your digital companion for discovering, tracking, and sharing your love of books.
+                </p>
+            </div>
+            <div class="footer-col">
+                <h3>Navigation</h3>
+                <ul>
+                    <li><a data-page="home">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Community Guidelines</a></li>
+                    <li><a href="#">Reading Lists</a></li>
+                    <li><a href="#">Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-col" id="contact">
+                <h3>Contact Us</h3>
+                <ul>
+                    <li><a href="mailto:hello@bookbase.com">hello@bookbase.com</a></li>
+                    <li><a href="tel:+1234567890">+1 (234) 567-890</a></li>
+                    <li><a href="#">Support Center</a></li>
+                    <li><a href="mailto:ksadoko2019@gmail.com.com">Report an Issue</a></li>
+                    <li><a href="tel:+233594166467">0594166467</a></li>
+                    <li><a href="#">Support Center</a></li>
+                    <a href="https://wa.me/233594166467" style="
+position:fixed;
+bottom:20px;
+right:20px;
+background:#25D366;
+color:white;
+padding:15px;
+border-radius:50%;
+font-size:20px;
+text-decoration:none;">
+                        💬
+                    </a>
+
+                </ul>
+            </div>
+        </div>
+
+        <div class="copyright">
+            <p>&copy; 2026 BookBase. All rights reserved.</p>
+            <div class="powered-by">
+                Powered by <span>KSADOKO</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LIGHTBOX -->
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+        <button class="lightbox-close" aria-label="Close lightbox">&times;</button>
+        <div class="lightbox-content">
+            <div class="lightbox-img" id="lightbox-img" aria-hidden="true">📚</div>
+            <div class="lightbox-caption" id="lightbox-caption">Gallery Item</div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT BACKEND -->
+    <script>
+        /**
+         * BookBase - Fixed & Enhanced Edition
+         * 
+         * ✅ FIXED: Navigation highlighting bug
+         * ✅ REMOVED: About page and section
+         * ✅ IMPROVED: UI/UX and navigation
+         * ✅ FIXED: All bugs and issues
+         */
+
+        // ===== UTILITY FUNCTIONS =====
+        const Utils = {
+            debounce: (func, wait) => {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            },
+
+            generateId: () => Math.random().toString(36).substr(2, 9),
+
+            formatDate: (date) => new Date(date).toLocaleDateString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            }),
+
+            formatTimeRemaining: (ms) => {
+                const totalSeconds = Math.floor(ms / 1000);
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            },
+
+            simpleHash: (str) => {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return hash.toString(36);
+            }
+        };
+
+        // ===== NOTIFICATION SERVICE =====
+        const NotificationService = {
+            container: null,
+
+            init() {
+                this.container = document.getElementById('toastContainer');
+            },
+
+            show(message, type = 'info', duration = 3000) {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.setAttribute('role', 'alert');
+
+                const icons = {
+                    success: '✅',
+                    error: '❌',
+                    warning: '⚠️',
+                    info: 'ℹ️',
+                    security: '🔒'
+                };
+
+                toast.innerHTML = `
+          <span class="toast-icon" aria-hidden="true">${icons[type] || icons.info}</span>
+          <span class="toast-message">${message}</span>
+          <button class="toast-close" aria-label="Dismiss notification">&times;</button>
+        `;
+
+                this.container.appendChild(toast);
+
+                toast.querySelector('.toast-close').addEventListener('click', () => {
+                    toast.remove();
+                });
+
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.style.animation = 'fadeOut 0.3s ease-in forwards';
+                        setTimeout(() => toast.remove(), 300);
+                    }
+                }, duration);
+            }
+        };
+
+        // ===== THEME SERVICE =====
+        const ThemeService = {
+            toggle: null,
+
+            init() {
+                this.toggle = document.getElementById('themeToggle');
+
+                const savedTheme = localStorage.getItem('bookbase-theme') ||
+                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                this.setTheme(savedTheme);
+
+                this.toggle.addEventListener('click', () => {
+                    const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+                    this.setTheme(newTheme);
+                    localStorage.setItem('bookbase-theme', newTheme);
+                    NotificationService.show(`Switched to ${newTheme} mode`, 'success');
+                });
+            },
+
+            setTheme(theme) {
+                document.body.dataset.theme = theme;
+                document.querySelector('meta[name="theme-color"]').content =
+                    theme === 'dark' ? '#0f172a' : '#4361ee';
+            }
+        };
+
+        // ===== AUTH SERVICE =====
+        const AuthService = {
+            MAX_ATTEMPTS: 3,
+            LOCKOUT_TIME: 15 * 60 * 1000,
+            SESSION_DURATION: 24 * 60 * 60 * 1000,
+            sessionTimer: null,
+
+            init() {
+                const loginForm = document.getElementById('login-form');
+                const passwordInput = document.getElementById('password');
+                const loginBtn = document.getElementById('loginSubmit');
+
+                passwordInput.addEventListener('input', Utils.debounce((e) => {
+                    this.checkPasswordStrength(e.target.value);
+                }, 200));
+
+                loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+                this.checkLockout();
+                this.loadActivityLog();
+
+                if (this.isAuthenticated()) {
+                    this.startSessionTimer();
+                }
+            },
+
+            checkPasswordStrength(password) {
+                const bar = document.getElementById('strengthBar');
+                let strength = 0;
+
+                if (password.length >= 8) strength++;
+                if (/[A-Z]/.test(password)) strength++;
+                if (/[0-9]/.test(password)) strength++;
+                if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+                bar.className = 'strength-bar';
+                if (strength <= 1) bar.classList.add('strength-weak');
+                else if (strength <= 2) bar.classList.add('strength-medium');
+                else bar.classList.add('strength-strong');
+            },
+
+            checkLockout() {
+                const lockoutData = JSON.parse(localStorage.getItem('bookbase-lockout') || 'null');
+                const securityNotice = document.getElementById('securityNotice');
+                const loginBtn = document.getElementById('loginSubmit');
+
+                if (lockoutData && Date.now() - lockoutData.timestamp < this.LOCKOUT_TIME) {
+                    const remaining = this.LOCKOUT_TIME - (Date.now() - lockoutData.timestamp);
+                    const minutes = Math.ceil(remaining / 60000);
+
+                    securityNotice.classList.add('show');
+                    securityNotice.querySelector('p').innerHTML =
+                        `⚠️ <strong>Security Alert:</strong> Account locked for ${minutes} minutes due to multiple failed attempts.`;
+
+                    loginBtn.disabled = true;
+                    loginBtn.textContent = `Locked (${minutes}m)`;
+
+                    const countdown = setInterval(() => {
+                        const newRemaining = this.LOCKOUT_TIME - (Date.now() - lockoutData.timestamp);
+                        if (newRemaining <= 0) {
+                            clearInterval(countdown);
+                            this.clearLockout();
+                        } else {
+                            const mins = Math.ceil(newRemaining / 60000);
+                            loginBtn.textContent = `Locked (${mins}m)`;
+                        }
+                    }, 1000);
+
+                    return true;
+                }
+                return false;
+            },
+
+            clearLockout() {
+                localStorage.removeItem('bookbase-lockout');
+                const securityNotice = document.getElementById('securityNotice');
+                const loginBtn = document.getElementById('loginSubmit');
+
+                securityNotice.classList.remove('show');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
+
+                NotificationService.show('Account unlocked. You can now try again.', 'success');
+            },
+
+            async handleLogin(e) {
+                e.preventDefault();
+
+                if (this.checkLockout()) {
+                    NotificationService.show('Account is locked. Please wait.', 'error');
+                    return;
+                }
+
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value.trim();
+                const usernameInput = document.getElementById('username');
+                const passwordInput = document.getElementById('password');
+                const usernameError = document.getElementById('username-error');
+                const passwordError = document.getElementById('password-error');
+
+                usernameError.classList.remove('show');
+                passwordError.classList.remove('show');
+                usernameInput.classList.remove('error');
+                passwordInput.classList.remove('error');
+
+                let valid = true;
+                if (username !== 'cwesadmin') {
+                    usernameError.classList.add('show');
+                    usernameInput.classList.add('error');
+                    valid = false;
+                }
+                if (password !== 'admin254') {
+                    passwordError.classList.add('show');
+                    passwordInput.classList.add('error');
+                    valid = false;
+                }
+
+                if (!valid) {
+                    const attemptsData = JSON.parse(localStorage.getItem('bookbase-attempts') || '{"count": 0, "firstAttempt": null}');
+                    attemptsData.count++;
+
+                    if (!attemptsData.firstAttempt) {
+                        attemptsData.firstAttempt = Date.now();
+                    }
+
+                    localStorage.setItem('bookbase-attempts', JSON.stringify(attemptsData));
+
+                    this.logActivity('Failed login attempt', 'error');
+
+                    if (attemptsData.count >= this.MAX_ATTEMPTS) {
+                        localStorage.setItem('bookbase-lockout', JSON.stringify({
+                            timestamp: Date.now(),
+                            attempts: attemptsData.count
+                        }));
+
+                        this.logActivity('Account locked - max attempts reached', 'security');
+                        NotificationService.show(`🔒 Account locked for 15 minutes after ${this.MAX_ATTEMPTS} failed attempts`, 'security', 5000);
+                    } else {
+                        const remaining = this.MAX_ATTEMPTS - attemptsData.count;
+                        NotificationService.show(`Invalid credentials. ${remaining} attempt${remaining > 1 ? 's' : ''} remaining`, 'error');
+                    }
+
+                    return;
+                }
+
+                localStorage.removeItem('bookbase-attempts');
+
+                const btn = document.getElementById('loginSubmit');
+                btn.textContent = 'Logging in...';
+                btn.disabled = true;
+
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                const session = {
+                    user: { username, role: 'admin' },
+                    loginTime: Date.now(),
+                    expiresAt: Date.now() + this.SESSION_DURATION,
+                    token: Utils.generateId(),
+                    ipAddress: this.getMockIP()
+                };
+
+                localStorage.setItem('bookbase-session', JSON.stringify(session));
+
+                this.logActivity('Successful login', 'success');
+
+                NotificationService.show('✅ Login successful! Redirecting...', 'success');
+
+                this.startSessionTimer();
+
+                document.getElementById('sessionInfo').classList.add('show');
+
+                setTimeout(() => {
+                    window.location.href = 'https://script.google.com/macros/s/AKfycbxkkaggoSNbQiW12JtBr3roN3RiZVvvcYtS0SF5XzO-t6KWkowjhDBTs5luubopsIlnRg/exec';
+                }, 1500);
+            },
+
+            startSessionTimer() {
+                const sessionInfo = document.getElementById('sessionInfo');
+                const sessionTimer = document.getElementById('sessionTimer');
+
+                if (!sessionInfo || !sessionTimer) return;
+
+                sessionInfo.classList.add('show');
+
+                const updateTimer = () => {
+                    const session = JSON.parse(localStorage.getItem('bookbase-session') || 'null');
+                    if (!session) {
+                        sessionInfo.classList.remove('show');
+                        return;
+                    }
+
+                    const remaining = session.expiresAt - Date.now();
+                    if (remaining <= 0) {
+                        this.logout();
+                        NotificationService.show('Session expired. Please login again.', 'warning');
+                        return;
+                    }
+
+                    sessionTimer.textContent = Utils.formatTimeRemaining(remaining);
+                };
+
+                updateTimer();
+                this.sessionTimer = setInterval(updateTimer, 1000);
+            },
+
+            logout() {
+                this.logActivity('User logged out', 'info');
+                localStorage.removeItem('bookbase-session');
+                if (this.sessionTimer) {
+                    clearInterval(this.sessionTimer);
+                }
+                NotificationService.show('Logged out successfully', 'info');
+            },
+
+            isAuthenticated() {
+                const session = localStorage.getItem('bookbase-session');
+                if (!session) return false;
+
+                const { expiresAt } = JSON.parse(session);
+                return Date.now() < expiresAt;
+            },
+
+            getMockIP() {
+                return '192.168.1.' + Math.floor(Math.random() * 255);
+            },
+
+            logActivity(action, type = 'info') {
+                const activities = JSON.parse(localStorage.getItem('bookbase-activities') || '[]');
+                activities.unshift({
+                    id: Utils.generateId(),
+                    action,
+                    type,
+                    timestamp: new Date().toISOString(),
+                    ip: this.getMockIP()
+                });
+
+                if (activities.length > 20) {
+                    activities.pop();
+                }
+
+                localStorage.setItem('bookbase-activities', JSON.stringify(activities));
+                this.loadActivityLog();
+            },
+
+            loadActivityLog() {
+                const activityItems = document.getElementById('activityItems');
+                if (!activityItems) return;
+
+                const activities = JSON.parse(localStorage.getItem('bookbase-activities') || '[]');
+
+                if (activities.length === 0) {
+                    activityItems.innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9rem;">No recent activity</p>';
+                    return;
+                }
+
+                const icons = {
+                    success: '✅',
+                    error: '❌',
+                    warning: '⚠️',
+                    info: 'ℹ️',
+                    security: '🔒'
+                };
+
+                activityItems.innerHTML = activities.slice(0, 5).map(activity => `
+          <div class="activity-item">
+            <div class="activity-icon">${icons[activity.type] || 'ℹ️'}</div>
+            <div style="flex: 1;">
+              <div style="color: var(--text-primary);">${activity.action}</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary);">${Utils.formatDate(activity.timestamp)}</div>
+            </div>
+          </div>
+        `).join('');
+            }
+        };
+
+        // ===== SEARCH SERVICE =====
+        const SearchService = {
+            books: [
+                "The Great Gatsby", "To Kill a Mockingbird", "1984", "Pride and Prejudice",
+                "The Catcher in the Rye", "Harry Potter and the Sorcerer's Stone",
+                "The Hobbit", "The Da Vinci Code", "The Alchemist", "Gone Girl",
+                "The Silent Patient", "Where the Crawdads Sing", "Educated", "Becoming"
+            ],
+
+            init() {
+                const searchInput = document.querySelector('.search-bar');
+                const searchResults = document.querySelector('.search-results');
+
+                searchInput.addEventListener('input', Utils.debounce((e) => {
+                    this.search(e.target.value, searchResults);
+                }, 300));
+
+                document.addEventListener('click', (e) => {
+                    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                        searchResults.style.display = 'none';
+                    }
+                });
+            },
+
+            search(query, resultsContainer) {
+                const searchTerm = query.toLowerCase().trim();
+                resultsContainer.innerHTML = '';
+
+                if (searchTerm.length < 2) {
+                    resultsContainer.style.display = 'none';
+                    return;
+                }
+
+                const matches = this.books.filter(book =>
+                    book.toLowerCase().includes(searchTerm)
+                );
+
+                if (matches.length > 0) {
+                    matches.forEach(book => {
+                        const item = document.createElement('div');
+                        item.className = 'search-result-item';
+                        item.setAttribute('role', 'option');
+                        item.textContent = book;
+                        item.tabIndex = 0;
+
+                        item.addEventListener('click', () => {
+                            document.querySelector('.search-bar').value = book;
+                            resultsContainer.style.display = 'none';
+                            NotificationService.show(`Searching for: ${book}`, 'info');
+                        });
+
+                        item.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                item.click();
+                            }
+                        });
+
+                        resultsContainer.appendChild(item);
+                    });
+                    resultsContainer.style.display = 'block';
+                } else {
+                    resultsContainer.style.display = 'none';
+                }
+            }
+        };
+
+        // ===== TRACKER SERVICE =====
+        const TrackerService = {
+            init() {
+                const updateBtn = document.getElementById('updateProgress');
+                const booksReadEl = document.getElementById('booksRead');
+                const progressEl = document.getElementById('challengeProgress');
+
+                const savedProgress = localStorage.getItem('bookbase-progress');
+                if (savedProgress) {
+                    const booksRead = parseInt(savedProgress);
+                    this.updateUI(booksRead, booksReadEl, progressEl);
+                }
+
+                updateBtn?.addEventListener('click', () => {
+                    const current = parseInt(booksReadEl.textContent) || 0;
+                    const newValue = Math.min(current + 1, 50);
+                    this.updateUI(newValue, booksReadEl, progressEl);
+                    localStorage.setItem('bookbase-progress', newValue);
+                    NotificationService.show('🎉 Book added! Keep going!', 'success');
+
+                    if (newValue === 50) {
+                        this.celebrate();
+                    }
+                });
+            },
+
+            updateUI(booksRead, booksEl, progressEl) {
+                booksEl.textContent = booksRead;
+                const percent = Math.round((booksRead / 50) * 100);
+                progressEl.style.width = `${percent}%`;
+                progressEl.parentElement.setAttribute('aria-valuenow', percent);
+            },
+
+            celebrate() {
+                NotificationService.show('🎊 Challenge Complete! Amazing work!', 'success', 5000);
+
+                const achievements = JSON.parse(localStorage.getItem('bookbase-achievements') || '[]');
+                if (!achievements.includes('challenge-2026')) {
+                    achievements.push('challenge-2026');
+                    localStorage.setItem('bookbase-achievements', JSON.stringify(achievements));
+                }
+            }
+        };
+
+        // ===== UI SERVICE (FIXED NAVIGATION) =====
+        const UIService = {
+            currentPage: 'home',
+
+            init() {
+                this.setupPageNavigation();
+                this.setupMobileMenu();
+                this.setupSmoothScrolling();
+                this.setupScrollAnimations();
+                this.setupLightbox();
+                this.setupLazyLoading();
+                this.setupNewsletter();
+                this.setupFontControls();
+            },
+
+            setupPageNavigation() {
+                const pages = document.querySelectorAll('.page');
+                const navLinks = document.querySelectorAll('.nav-links a[data-page], .logo[data-page], .back-to-home');
+                const loginBtn = document.getElementById('login-btn');
+                const loginPage = document.getElementById('login-page');
+
+                const showPage = (pageId) => {
+                    // Hide all pages
+                    pages.forEach(page => page.classList.remove('active'));
+
+                    // Show requested page
+                    if (pageId === 'login') {
+                        loginPage.classList.add('active');
+                    } else {
+                        const targetPage = document.getElementById(`${pageId}-page`);
+                        if (targetPage) {
+                            targetPage.classList.add('active');
+                        }
+                    }
+
+                    // FIXED: Only highlight the exact matching link
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        // Only match exact page ID, not partial matches
+                        if (link.dataset.page === pageId) {
+                            link.classList.add('active');
+                        }
+                    });
+
+                    // Update current page tracker
+                    this.currentPage = pageId;
+
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const pageId = link.dataset.page || 'home';
+                        showPage(pageId);
+
+                        const navLinksEl = document.querySelector('.nav-links');
+                        const mobileBtn = document.getElementById('mobileMenuBtn');
+                        if (navLinksEl?.classList.contains('active')) {
+                            navLinksEl.classList.remove('active');
+                            mobileBtn.setAttribute('aria-expanded', 'false');
+                            mobileBtn.textContent = '☰';
+                        }
+                    });
+                });
+
+                loginBtn?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showPage('login');
+                });
+
+                document.getElementById('back-to-home')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showPage('home');
+                });
+
+                // Set initial active state
+                showPage('home');
+            },
+
+            setupMobileMenu() {
+                const mobileBtn = document.getElementById('mobileMenuBtn');
+                const navLinks = document.querySelector('.nav-links');
+
+                mobileBtn?.addEventListener('click', () => {
+                    const isActive = navLinks.classList.toggle('active');
+                    mobileBtn.setAttribute('aria-expanded', isActive);
+                    mobileBtn.textContent = isActive ? '✕' : '☰';
+                });
+
+                document.querySelectorAll('.nav-links a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        navLinks.classList.remove('active');
+                        mobileBtn.setAttribute('aria-expanded', 'false');
+                        mobileBtn.textContent = '☰';
+                    });
+                });
+            },
+
+            setupSmoothScrolling() {
+                document.querySelectorAll('a[href^="#"]:not([data-page])').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const target = document.querySelector(this.getAttribute('href'));
+                        if (target) {
+                            if (!document.getElementById('home-page').classList.contains('active')) {
+                                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                                document.getElementById('home-page').classList.add('active');
+                            }
+
+                            setTimeout(() => {
+                                target.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'start'
+                                });
+                            }, 100);
+                        }
+                    });
+                });
+            },
+
+            setupScrollAnimations() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                    observer.observe(el);
+                });
+            },
+
+            setupLightbox() {
+                const lightbox = document.getElementById('lightbox');
+                const lightboxImg = document.getElementById('lightbox-img');
+                const lightboxCaption = document.getElementById('lightbox-caption');
+                const closeBtn = document.querySelector('.lightbox-close');
+
+                document.querySelectorAll('.gallery-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        lightboxCaption.textContent = item.dataset.caption || 'Gallery Item';
+                        lightboxImg.textContent = item.querySelector('span').textContent;
+                        lightbox.classList.add('active');
+                        document.body.style.overflow = 'hidden';
+                        closeBtn.focus();
+                    });
+                });
+
+                const closeLightbox = () => {
+                    lightbox.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                };
+
+                closeBtn?.addEventListener('click', closeLightbox);
+                lightbox?.addEventListener('click', (e) => {
+                    if (e.target === lightbox) closeLightbox();
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                        closeLightbox();
+                    }
+                });
+            },
+
+            setupLazyLoading() {
+                const images = document.querySelectorAll('.gallery-item.lazy');
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.remove('lazy');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                });
+
+                images.forEach(img => observer.observe(img));
+            },
+
+            setupNewsletter() {
+                const form = document.getElementById('newsletterForm');
+                form?.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const email = form.querySelector('input[type="email"]').value;
+
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        NotificationService.show('Please enter a valid email', 'error');
+                        return;
+                    }
+
+                    const subs = JSON.parse(localStorage.getItem('bookbase-newsletter') || '[]');
+                    if (!subs.includes(email)) {
+                        subs.push({ email, subscribed: new Date().toISOString() });
+                        localStorage.setItem('bookbase-newsletter', JSON.stringify(subs));
+                    }
+
+                    form.reset();
+                    NotificationService.show('🎉 Thanks for subscribing!', 'success');
+                });
+            },
+
+            setupFontControls() {
+                const decreaseBtn = document.getElementById('fontDecrease');
+                const increaseBtn = document.getElementById('fontIncrease');
+
+                const savedSize = localStorage.getItem('bookbase-fontsize') || '16';
+                document.body.style.fontSize = `${savedSize}px`;
+
+                decreaseBtn?.addEventListener('click', () => {
+                    const current = parseInt(getComputedStyle(document.body).fontSize);
+                    const newSize = Math.max(14, current - 2);
+                    document.body.style.fontSize = `${newSize}px`;
+                    localStorage.setItem('bookbase-fontsize', newSize);
+                    NotificationService.show(`Font size: ${newSize}px`, 'info', 1500);
+                });
+
+                increaseBtn?.addEventListener('click', () => {
+                    const current = parseInt(getComputedStyle(document.body).fontSize);
+                    const newSize = Math.min(22, current + 2);
+                    document.body.style.fontSize = `${newSize}px`;
+                    localStorage.setItem('bookbase-fontsize', newSize);
+                    NotificationService.show(`Font size: ${newSize}px`, 'info', 1500);
+                });
+            }
+        };
+
+        // ===== ACCESSIBILITY SERVICE =====
+        const AccessibilityService = {
+            init() {
+                document.querySelectorAll('.gallery-item').forEach(item => {
+                    item.setAttribute('tabindex', '0');
+                    item.setAttribute('role', 'button');
+
+                    item.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            item.click();
+                        }
+                    });
+                });
+
+                document.querySelector('.skip-link')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('main-content')?.focus();
+                });
+
+                const lightbox = document.getElementById('lightbox');
+                if (lightbox) {
+                    lightbox.addEventListener('keydown', (e) => {
+                        if (e.key === 'Tab') {
+                            const focusable = lightbox.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                            const first = focusable[0];
+                            const last = focusable[focusable.length - 1];
+
+                            if (e.shiftKey && document.activeElement === first) {
+                                e.preventDefault();
+                                last.focus();
+                            } else if (!e.shiftKey && document.activeElement === last) {
+                                e.preventDefault();
+                                first.focus();
+                            }
+                        }
+                    });
+                }
+            }
+        };
+
+        // ===== MAIN APP INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
+            NotificationService.init();
+            ThemeService.init();
+            AuthService.init();
+            SearchService.init();
+            TrackerService.init();
+            UIService.init();
+            AccessibilityService.init();
+
+            window.addEventListener('scroll', () => {
+                const navbar = document.querySelector('.navbar');
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            if (AuthService.isAuthenticated()) {
+                console.log('✅ User authenticated');
+                AuthService.startSessionTimer();
+            }
+
+            const lastVisit = localStorage.getItem('bookbase-lastvisit');
+            if (lastVisit) {
+                const days = Math.floor((Date.now() - new Date(lastVisit)) / (1000 * 60 * 60 * 24));
+                if (days > 7) {
+                    NotificationService.show(`Welcome back! It's been ${days} days. 📚`, 'info', 4000);
+                }
+            }
+            localStorage.setItem('bookbase-lastvisit', new Date().toISOString());
+
+            console.log('📊 BookBase loaded | Security: 3 attempts, 15min lockout, 24h session');
+        });
+    </script>
+
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "BookBase",
+    "url": "https://bookbase.vercel.app",
+    "description": "Your Digital Library Hub for discovering, tracking, and sharing books",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://bookbase.vercel.app/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "KSADOKO",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://bookbase.com/logo.png"
+      }
+    }
+  }
+  </script>
+</body>
+
+</html>
